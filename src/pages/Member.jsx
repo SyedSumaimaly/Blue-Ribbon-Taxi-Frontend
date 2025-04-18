@@ -219,6 +219,10 @@ const Members = () => {
     const [modalImage, setModalImage] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
 
+    const openModal = (imgSrc) => {
+        setModalImage(imgSrc);
+    };
+
     // Function to fetch members
     const fetchMembers = async () => {
         try {
@@ -261,20 +265,45 @@ const Members = () => {
     };
 
     // Handle file input change (avatar, signature, and driving license)
+    // const handleFile = (e) => {
+    //     const { name, files } = e.target;
+    //     if (!files[0]) return;
+    //     const file = files[0];
+    //     const url = URL.createObjectURL(file);
+
+    //     setFormData((f) => ({ ...f, [name]: file }));
+
+    //     if (name === 'drivingLicense') {
+    //         setPreviewDL(url);
+    //     } else if (name === 'avatar') {
+    //         setPreviewAvatar(url);
+    //     } else if (name === 'signature') {
+    //         setPreviewSignature(url);
+    //     }
+    // };
+
     const handleFile = (e) => {
-        const { name, files } = e.target;
-        if (!files[0]) return;
+        const { id, files } = e.target;
         const file = files[0];
-        const url = URL.createObjectURL(file);
+        if (!file) return;
 
-        setFormData((f) => ({ ...f, [name]: file }));
+        const previewURL = URL.createObjectURL(file);
 
-        if (name === 'drivingLicense') {
-            setPreviewDL(url);
-        } else if (name === 'avatar') {
-            setPreviewAvatar(url);
-        } else if (name === 'signature') {
-            setPreviewSignature(url);
+        switch (id) {
+            case 'drivingLicense':
+                setPreviewDL(previewURL);
+                setFormData({ ...formData, drivingLicenseFile: file });
+                break;
+            case 'avatar':
+                setPreviewAvatar(previewURL);
+                setFormData({ ...formData, avatarFile: file });
+                break;
+            case 'signature':
+                setPreviewSignature(previewURL);
+                setFormData({ ...formData, signatureFile: file });
+                break;
+            default:
+                break;
         }
     };
 
@@ -617,104 +646,80 @@ const Members = () => {
 
 
                     {/* File Upload Section */}
+
+
                     <div className="col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {/* Driving License */}
-                        <div className="w-full">
-                            <div className="relative h-40 border rounded-md overflow-hidden shadow-sm flex items-center justify-center">
-                                {previewDL ? (
-                                    <img
-                                        src={previewDL}
-                                        alt="DL Preview"
-                                        className="w-full h-full object-cover cursor-pointer"
-                                        onClick={() => openModal(previewDL)}
-                                    />
-                                ) : (
-                                    <label
-                                        htmlFor="drivingLicense"
-                                        className="flex flex-col items-center justify-center text-gray-500 cursor-pointer"
-                                    >
-                                        <FaFilePdf size={28} />
-                                        <span className="mt-2 text-sm">Upload Driving License</span>
-                                    </label>
-                                )}
-                                <input
-                                    id="drivingLicense"
-                                    name="drivingLicense"
-                                    type="file"
-                                    accept="image/*,application/pdf"
-                                    className="absolute inset-0 opacity-0 cursor-pointer"
-                                    onChange={handleFile}
-                                />
-                            </div>
-                        </div>
+                        {[
+                            {
+                                id: 'drivingLicense',
+                                icon: <FaFilePdf size={28} />,
+                                preview: previewDL,
+                                alt: 'Driving License Preview',
+                                label: 'Upload Driving License',
+                            },
+                            {
+                                id: 'avatar',
+                                icon: <FaCamera size={28} />,
+                                preview: previewAvatar,
+                                alt: 'Avatar Preview',
+                                label: 'Upload Avatar',
+                            },
+                            {
+                                id: 'signature',
+                                icon: <FaSignature size={28} />,
+                                preview: previewSignature,
+                                alt: 'Signature Preview',
+                                label: 'Upload Signature',
+                            },
+                        ].map(({ id, icon, preview, alt, label }) => (
+                            <div
+                                key={id}
+                                className="flex flex-col justify-between bg-white border border-gray-200 rounded-lg shadow-sm p-3 hover:shadow-md transition-shadow h-full"
+                            >
+                                {/* Preview Box */}
+                                <div className="relative h-36 border border-dashed border-gray-300 rounded-md overflow-hidden flex items-center justify-center bg-gray-50 hover:bg-gray-100 transition mb-3">
+                                    {preview ? (
+                                        <img
+                                            src={preview}
+                                            alt={alt}
+                                            className="w-full h-full object-cover cursor-pointer transition-transform duration-200 hover:scale-105"
+                                            onClick={() => openModal(preview)}
+                                        />
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center text-gray-400">
+                                            {icon}
+                                            <span className="mt-1 text-xs font-medium">{label}</span>
+                                        </div>
+                                    )}
+                                </div>
 
-                        {/* Avatar */}
-                        <div className="w-full">
-                            <div className="relative h-40 border rounded-md overflow-hidden shadow-sm flex items-center justify-center">
-                                {previewAvatar ? (
-                                    <img
-                                        src={previewAvatar}
-                                        alt="Avatar Preview"
-                                        className="w-full h-full object-cover cursor-pointer"
-                                        onClick={() => openModal(previewAvatar)}
-                                    />
-                                ) : (
+                                {/* Upload Button */}
+                                <div className="relative">
                                     <label
-                                        htmlFor="avatar"
-                                        className="flex flex-col items-center justify-center text-gray-500 cursor-pointer"
+                                        htmlFor={id}
+                                        className="block text-center bg-blue-600 text-white text-sm py-1.5 px-3 rounded cursor-pointer hover:bg-blue-700 transition"
                                     >
-                                        <FaCamera size={28} />
-                                        <span className="mt-2 text-sm">Upload Avatar</span>
+                                        Choose File
                                     </label>
-                                )}
-                                <input
-                                    id="avatar"
-                                    name="avatar"
-                                    type="file"
-                                    accept="image/*"
-                                    className="absolute inset-0 opacity-0 cursor-pointer"
-                                    onChange={handleFile}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Signature */}
-                        <div className="w-full">
-                            <div className="relative h-40 border rounded-md overflow-hidden shadow-sm flex items-center justify-center">
-                                {previewSignature ? (
-                                    <img
-                                        src={previewSignature}
-                                        alt="Signature Preview"
-                                        className="w-full h-full object-cover cursor-pointer"
-                                        onClick={() => openModal(previewSignature)}
+                                    <input
+                                        id={id}
+                                        name={id}
+                                        type="file"
+                                        accept={id === 'drivingLicense' ? 'image/*,application/pdf' : 'image/*'}
+                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                        onChange={handleFile}
                                     />
-                                ) : (
-                                    <label
-                                        htmlFor="signature"
-                                        className="flex flex-col items-center justify-center text-gray-500 cursor-pointer"
-                                    >
-                                        <FaSignature size={28} />
-                                        <span className="mt-2 text-sm">Upload Signature</span>
-                                    </label>
-                                )}
-                                <input
-                                    id="signature"
-                                    name="signature"
-                                    type="file"
-                                    accept="image/*"
-                                    className="absolute inset-0 opacity-0 cursor-pointer"
-                                    onChange={handleFile}
-                                />
+                                </div>
                             </div>
-                        </div>
+                        ))}
 
                         {/* Modal Preview */}
                         {modalImage && (
-                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                                <div className="relative bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+                            <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+                                <div className="relative bg-white p-5 rounded-lg shadow-xl max-w-xl w-full">
                                     <button
                                         onClick={closeModal}
-                                        className="absolute top-2 right-2 text-white bg-red-500 hover:bg-red-600 rounded-full p-2"
+                                        className="absolute top-2 right-2 text-white bg-red-500 hover:bg-red-600 rounded-full w-7 h-7 flex items-center justify-center text-sm"
                                     >
                                         ✕
                                     </button>
@@ -723,15 +728,11 @@ const Members = () => {
                                         alt="Large Preview"
                                         className="w-full h-auto object-contain rounded"
                                     />
-                                    <div className="text-center mt-4">
+                                    <div className="text-center mt-3">
                                         <a
                                             href={modalImage}
-                                            download={
-                                                formData.drivingLicense?.type === 'application/pdf'
-                                                    ? 'driving_license.pdf'
-                                                    : 'preview.jpg'
-                                            }
-                                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                                            download="preview.jpg"
+                                            className="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 transition text-sm"
                                         >
                                             Download
                                         </a>
@@ -740,6 +741,8 @@ const Members = () => {
                             </div>
                         )}
                     </div>
+
+
 
 
                     {/* Submit Button */}
